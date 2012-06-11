@@ -60,7 +60,7 @@ class TestParagraph(unittest.TestCase):
     def test_too_few_lines(self):
         master = []
         master.append("formal mornings of languid lounging")
-        master.append("dissolute soldiers decy indecency")
+        master.append("dissolute soldiers decry indecency")
         master.append("sesquipedalian")
         self.assertEqual(typer.evaluate_submission(master, master[:2]), 14)
     
@@ -85,7 +85,7 @@ class TestParagraph(unittest.TestCase):
         submission = []
         submission.append('against everythig with inten')# 2 typoes
         submission.append('huhngarin lunche for Everyon')# 6 typoes
-        submission.append('a stubborn savage certaintyy')# 1 typoes
+        submission.append('a stubborn savage certaintyy')# 1 typo
         self.assertEqual(typer.evaluate_submission(master, submission), 9)
         
 if __name__ == '__main__':

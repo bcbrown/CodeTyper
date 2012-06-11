@@ -3,42 +3,57 @@ import json
 import base64
 import random
 
-domain = 'https://api.github.com'
+_domain = 'https://api.github.com'
+_extensions = ['.py', '.c', '.cpp', '.h', '.rb', '.js', '.cs']
+
 def get_refs(user, repo):
     method = '/repos/' + user + '/' + repo + '/git/refs'
-    r = requests.get(domain+method)
+    r = requests.get(_domain+method)
     return json.loads(r.content)
     
 def get_commit(user, repo, sha):
     method = '/repos/' + user + '/' + repo + '/git/commits/' + sha
-    return json.loads(requests.get(domain+method).content)
+    return json.loads(requests.get(_domain + method).content)
     
 def get_tree(user, repo, sha):
     method = '/repos/' + user + '/' + repo + '/git/trees/' + sha + '?recursive=1'
-    return json.loads(requests.get(domain+method).content)
+    return json.loads(requests.get(_domain + method).content)
     
 def get_blob(user, repo, sha):
     method = '/repos/' + user + '/' + repo + '/git/blobs/' + sha
-    return json.loads(requests.get(domain+method).content)
+    return json.loads(requests.get(_domain + method).content)    
     
-def get_text(user='bcbrown', repo='thinkpython-exercises'):
-    # need to choose which ref, which tree
-    # need to split a code file into 
-    # at each stage choose randomly
-    # if dead-end, loop to next 
-    # via (if return is not None)
-    # inside a for r in object
-    # with a final return from inside innermost loop
+def get_file(user='bcbrown', repo='CodeTyper'):
     refs = get_refs(user, repo)
-    ref_count = len(refs)
-    i = random.randint(0, ref_count-1)
-    sha = refs[i]['object']['sha']
-    commit_sha = get_commit(user, repo, sha)['sha']
-    tree = get_tree(user, repo, commit_sha)
-    print 'trees:', len(tree['tree'])
-    tree_sha = tree['tree'][0]['sha']
-    tree_path = tree['tree'][0]['path']
-    print 'path:', tree_path
-    blob = get_blob(user, repo, tree_sha)
-    text = base64.b64decode(blob['content'])
-    return text
+    # error when repo is empty:
+    # >>> t = github.get_file() #returning 
+    # number of refs: 1
+    # ref: 0
+    # >>> t
+    # (0, {u'message': u'Git Repository is empty.'})
+    ref_indices = range(len(refs))
+    random.shuffle(ref_indices)
+    print "number of refs:", len(refs)
+    for ref in ref_indices:
+        print "ref:", ref
+        # return ref, refs
+        sha = refs[ref]['object']['sha']
+        commit_sha = get_commit(user, repo, sha)['sha']
+        tree = get_tree(user, repo, commit_sha)
+        print 'number of blobs', len(tree['tree'])
+        # choose blobs at random, returning the first non-empty blob
+        tree_indices = range(len(tree['tree']))
+        random.shuffle(tree_indices)
+        for t in tree_indices:
+            print 'blob:', t
+            tree_sha = tree['tree'][t]['sha']
+            tree_path = tree['tree'][t]['path']
+            print 'path:', tree_path
+            # whitelist the extension:
+            if any([x in tree_path for x in _extensions]):
+                blob = get_blob(user, repo, tree_sha)
+                text = base64.b64decode(blob['content'])
+                if text:
+                    # TODO: replace slice with a regex
+                    return text, tree_path[:4] 
+    return None
