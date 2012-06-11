@@ -1,5 +1,7 @@
 import fileinput
 import time
+import github
+import random
 
 def evaluate_line(master, submission):
     if master == submission:
@@ -46,7 +48,7 @@ def evaluate_line(master, submission):
                     error += ss - s
                     s = ss
                 else:
-                    # equality implies a miss-hit key, not too many or too few.
+                    # equality implies a miss-hit key, not too many or too few
                     # different from the 'simple case' above in that 
                     # this handles a multiple-typo case, such as switching two
                     # letters, and that handles the single-typo case.
@@ -58,9 +60,24 @@ def evaluate_line(master, submission):
     return error
     
 def get_text():
-    return ["This is some text.",
-    "it is on multiple lines.",
-    "Please repeat it back."]
+    file, extension = github.get_file()
+    text = file.split('\n')
+    if '.py' in extension:
+        # pick a random line in the text
+        # search upwords for the last function def, and note the indentation
+        # search downards for the next line at the same indentation
+        while True:
+            i = random.randrange(len(text))
+            # Convert to regex later
+            while 'def' not in text[i]:
+                i -= 1
+                if i = -1:
+                    break
+            if i = -1:
+                # add max-redos functionality
+                break
+            # now we have the starting line
+            indentation = 
 
 def evaluate_submission(text, response):
     if text == response:
