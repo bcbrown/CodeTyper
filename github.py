@@ -26,17 +26,13 @@ def get_blob(user, repo, sha):
 def get_file(user='bcbrown', repo='CodeTyper'):
     refs = get_refs(user, repo)
     # error when repo is empty:
-    # >>> t = github.get_file() #returning 
-    # number of refs: 1
-    # ref: 0
-    # >>> t
-    # (0, {u'message': u'Git Repository is empty.'})
+    # {u'message': u'Git Repository is empty.'}
     ref_indices = range(len(refs))
     random.shuffle(ref_indices)
+    
     print "number of refs:", len(refs)
     for ref in ref_indices:
         print "ref:", ref
-        # return ref, refs
         sha = refs[ref]['object']['sha']
         commit_sha = get_commit(user, repo, sha)['sha']
         tree = get_tree(user, repo, commit_sha)
@@ -55,5 +51,5 @@ def get_file(user='bcbrown', repo='CodeTyper'):
                 text = base64.b64decode(blob['content'])
                 if text:
                     # TODO: replace slice with a regex
-                    return text, tree_path[:4] 
+                    return text, tree_path[-4:] 
     return None
