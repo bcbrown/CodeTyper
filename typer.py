@@ -3,6 +3,10 @@ import time
 import github
 import random
 import re
+import logging
+from __future__ import division
+
+logging.basicConfig(filename='codetyper.log',level=logging.DEBUG)
 
 def evaluate_line(master, submission):
     if master == submission:
@@ -14,17 +18,20 @@ def evaluate_line(master, submission):
     error = 0
     m = 0
     s = 0
+    logging.debug("master[%d]: %s", len(master), master)
+    logging.debug("submission[%d]: %s", len(submission), submission)
     while True:
-            # don't feel like tracking this down right now:
-            # Traceback (most recent call last):
-              # File "<stdin>", line 1, in <module>
-              # File "typer.py", line 155, in run
-                # error = evaluate_submission(text, submission)
-              # File "typer.py", line 131, in evaluate_submission
-                # error += evaluate_line(text[t], response[r])
-              # File "typer.py", line 28, in evaluate_line
-                # if master[m] != submission[s]:
-            # IndexError: string index out of range
+        # There's a bug here
+        # master:     if not master:
+        # submission: if not master:
+        # m: 0, s: 0
+        # m: 1, s: 3
+        # m: 2, s: 7
+        # m: 3, s: 15
+        # The algorithm as written will match master[0] to submission[2]
+        # 1 to 6, ie matching the spaces
+        # this causes s to go past the end of the string
+        logging.debug("m: %d, s: %d", m, s)
         # Use enumerate for the various index argument logic?
         # Exit condition. Special-case the last matchup
         if len(master) - 1 == m or len(submission) - 1 == s:
@@ -94,7 +101,7 @@ def get_method_end_python(start, indentation, text):
         m = re.search('\w', text[i])
         if m:
             if indentation == m.start():
-                return i
+                return i - 1
         i += 1
     
     
@@ -143,29 +150,30 @@ def evaluate_submission(text, response):
             r += 1
 
 
-def get_input(max_lines=-1):
+def get_input(indentations, max_lines):
     input = []
-    line = raw_input()
-    while line:
-        input.append(line)
-        if len(input) == max_lines:
-            break
-        line = raw_input()
+    for indent in indentations:
+        line = raw_input(' ' * indent)
+        input.append(' ' * indent + line)
     return input
 
 
 def run():
     text = get_text()
-    
+    indentations = []
+    p = re.compile(r'\s*(?=\S)')
     for line in text:
         print line
+        m = p.match(line)
+        indentations.append(m.end() if m else 0)
     start_clock = time.clock()
-    submission = get_input(len(text))
+    submission = get_input(indentations, len(text))
     end_clock = time.clock()
     error = evaluate_submission(text, submission)
     elapsed_time = round(end_clock - start_clock, 2)
-    print error
-    print elapsed_time
+    print "%d errors in %0.2f seconds" % (error, elapsed_time)
+    print "average time per line:", elapsed_time / len(text)
+    print "average errors per line:", error / len(text)
 
 if __name__ == '__main__':
     run()

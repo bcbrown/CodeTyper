@@ -1,0 +1,5 @@
+todo:
+Change error calculation to use min edit distance
+fix the bug where lots of errors causes the index errors
+fix spidering to take from interesting projects
+add support for C methods in get_text

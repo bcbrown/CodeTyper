@@ -45,6 +45,11 @@ class TestLine(unittest.TestCase):
     def testBothEmpty(self):
         master = ""
         self.assertEqual(typer.evaluate_line(master, master), 0)
+        
+    def testTest(self):
+        master = "123456789  "
+        sub = "123456654 "
+        self.assertEqual(typer.evaluate_line(master, master), 0)
 
     def testEmptyMaster(self):
         master = ""
