@@ -1,83 +1,13 @@
+from __future__ import division
 import fileinput
 import time
 import github
 import random
 import re
 import logging
-from __future__ import division
+from nltk.metrics import edit_distance
 
 logging.basicConfig(filename='codetyper.log',level=logging.DEBUG)
-
-def evaluate_line(master, submission):
-    if master == submission:
-        return 0
-    if not master:
-        return len(submission)
-    if not submission:
-        return len(master)
-    error = 0
-    m = 0
-    s = 0
-    logging.debug("master[%d]: %s", len(master), master)
-    logging.debug("submission[%d]: %s", len(submission), submission)
-    while True:
-        # There's a bug here
-        # master:     if not master:
-        # submission: if not master:
-        # m: 0, s: 0
-        # m: 1, s: 3
-        # m: 2, s: 7
-        # m: 3, s: 15
-        # The algorithm as written will match master[0] to submission[2]
-        # 1 to 6, ie matching the spaces
-        # this causes s to go past the end of the string
-        logging.debug("m: %d, s: %d", m, s)
-        # Use enumerate for the various index argument logic?
-        # Exit condition. Special-case the last matchup
-        if len(master) - 1 == m or len(submission) - 1 == s:
-            if master[m] != submission[s]:
-                error += 1
-            # one of these will be zero, but easier to add both
-            # than figure out which one to add
-            error += len(master[m + 1:])
-            error += len(submission[s + 1:])
-            break
-        if master[m] != submission[s]:
-            # the simple case
-            if master[m + 1] == submission[s + 1]:
-                error += 1
-            else:
-                mm = m
-                ss = s
-                # calculate the number of typoes assuming under-typing
-                while len(master) > mm:
-                    if master[mm] == submission[s]:
-                        break
-                    mm += 1
-                # calculate the number of typoes assuming over-typing
-                while len(submission) > ss:
-                    if master[m] == submission[ss]:
-                        break
-                    ss += 1
-                # find out which one was smaller and use it
-                if (mm - m) < (ss - s):
-                    error += mm - m
-                    m = mm
-                elif (mm - m) > (ss - s):
-                    error += ss - s
-                    s = ss
-                else:
-                    # equality implies a miss-hit key, not too many or too few
-                    # different from the 'simple case' above in that
-                    # this handles a multiple-typo case, such as switching two
-                    # letters, and that handles the single-typo case.
-                    error += mm - m
-                    m = mm
-                    s = ss
-        m += 1
-        s += 1
-    return error
-
 
 def get_text():
     # this function and everything it calls smells like a dead fish
@@ -139,13 +69,13 @@ def evaluate_submission(text, response):
     r = 0
     while True:
         if len(text) - 1 == t or len(response) - 1 == r:
-            error += evaluate_line(text[t], response[r])
+            error += edit_distance(text[t], response[r])
             # one of these will be zero
             error += sum([len(x) for x in response[r + 1:]])
             error += sum([len(x) for x in text[t + 1:]])
             return error
         else:
-            error += evaluate_line(text[t], response[r])
+            error += edit_distance(text[t], response[r])
             t += 1
             r += 1
 

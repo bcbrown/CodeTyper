@@ -1,7 +1,13 @@
 import unittest
 import typer
+from nltk.metrics import edit_distance
 
 class TestLine(unittest.TestCase):
+
+    def setUp(self):
+        # These tests were written when I had my own edit distance algorithm
+        # Now I'm using edit_distance, so bind it to the method called by the tests
+        typer.evaluate_line = edit_distance
     
     def testAccurate(self):
         master = "here's some very simple text with no typos"
@@ -60,6 +66,13 @@ class TestLine(unittest.TestCase):
         master = "not empty"
         sub = ""
         self.assertEqual(typer.evaluate_line(master, sub), 9)
+        
+    def testGreedyAlgorithmFailure(self):
+        # My custom-written algorithm failed this test
+        # Levenshtein distance passes this test
+        master = "this text has spaces"
+        sub = "        this text has spaces"
+        self.assertEqual(typer.evaluate_line(master, sub), 8)
 
 class TestParagraph(unittest.TestCase):
     def test_too_few_lines(self):
