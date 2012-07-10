@@ -80,14 +80,16 @@ class TestParagraph(unittest.TestCase):
         master.append("formal mornings of languid lounging")
         master.append("dissolute soldiers decry indecency")
         master.append("sesquipedalian")
-        self.assertEqual(typer.evaluate_submission(master, master[:2]), 14)
+		# the error is 15 because the missing '\n' is counted
+        self.assertEqual(typer.evaluate_submission(master, master[:2]), 15)
 
     def test_too_many_lines(self):
         master = []
         master.append('felicitous formalisms frolic')
         master.append('derelict dirigibles drifting')
         master.append('artifactant')
-        self.assertEqual(typer.evaluate_submission(master[:2], master), 11)
+		# the error is 12 because the missing '\n' is counted
+        self.assertEqual(typer.evaluate_submission(master[:2], master), 12)
 
     def test_correct_lines(self):
         master = []

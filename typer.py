@@ -58,27 +58,9 @@ def get_method_start_python(text):
         # unless that line was only whitespace, in which case loop again
 
 def evaluate_submission(text, response):
-    if text == response:
-        return 0
-    if not text:
-        return len(response)
-    if not response:
-        return len(text)
-    error = 0
-    t = 0
-    r = 0
-    while True:
-        if len(text) - 1 == t or len(response) - 1 == r:
-            error += edit_distance(text[t], response[r])
-            # one of these will be zero
-            error += sum([len(x) for x in response[r + 1:]])
-            error += sum([len(x) for x in text[t + 1:]])
-            return error
-        else:
-            error += edit_distance(text[t], response[r])
-            t += 1
-            r += 1
-
+	first = '\n'.join(text)
+	second = '\n'.join(response)
+	return edit_distance(first, second)
 
 def get_input(indentations, max_lines):
     input = []
